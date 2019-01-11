@@ -1,0 +1,65 @@
+version: '3'
+
+volumes:
+  test_postgres_data: {}
+  test_postgres_data_backups: {}
+
+services:
+
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    links:
+      - selenium
+    command: /test.sh
+    env_file:
+      - ./.envs/.test/.postgres
+      - ./.envs/.test/.django
+    image: deleteme_local_django
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+      - test_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.test/.postgres
+    image: deleteme_local_postgres
+
+  redis:
+    image: redis:alpine
+
+  celeryworker:
+    <<: *django
+    image: deleteme_local_celeryworker
+    depends_on:
+      - redis
+      - postgres
+
+    ports: []
+    command: /start-celeryworker
+
+  celerybeat:
+    <<: *django
+    image: deleteme_local_celerybeat
+    depends_on:
+      - redis
+      - postgres
+
+    ports: []
+    command: /start-celerybeat
+
+  selenium:
+    image: selenium/standalone-chrome:3.11.0
+    ports:
+      - 4444:4444

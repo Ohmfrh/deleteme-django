@@ -1,0 +1,72 @@
+version: '3'
+
+volumes:
+  local_postgres_data: {}
+  local_postgres_data_backups: {}
+
+services:
+
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    links:
+      - selenium
+    command: /start.sh
+    env_file:
+      - ./.envs/.local/.postgres
+      - ./.envs/.local/.django
+    image: deleteme_local_django
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data
+      - local_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.postgres
+    image: deleteme_local_postgres
+
+  redis:
+    image: redis:alpine
+
+  celeryworker:
+    <<: *django
+    image: deleteme_local_celeryworker
+    depends_on:
+      - redis
+      - postgres
+
+    ports: []
+    command: /start-celeryworker
+
+  celerybeat:
+    <<: *django
+    image: deleteme_local_celerybeat
+    depends_on:
+      - redis
+      - postgres
+
+    ports: []
+    command: /start-celerybeat
+
+  flower:
+    <<: *django
+    image: deleteme_local_flower
+    ports:
+      - "5555:5555"
+    command: /start-flower
+
+  selenium:
+    image: selenium/standalone-chrome:3.11.0
+    ports:
+      - 4444:4444
