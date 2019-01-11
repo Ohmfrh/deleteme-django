@@ -39,26 +39,6 @@ services:
   redis:
     image: redis:alpine
 
-  celeryworker:
-    <<: *django
-    image: deleteme_local_celeryworker
-    depends_on:
-      - redis
-      - postgres
-
-    ports: []
-    command: /start-celeryworker
-
-  celerybeat:
-    <<: *django
-    image: deleteme_local_celerybeat
-    depends_on:
-      - redis
-      - postgres
-
-    ports: []
-    command: /start-celerybeat
-
   selenium:
     image: selenium/standalone-chrome:3.11.0
     ports:
