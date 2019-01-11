@@ -3,5 +3,5 @@ node('docker') {
     stage 'Checkout'
         checkout scm
     stage 'Build & UnitTest'
-        docker run hello-world
+        sh "docker-compose -f local.yml build"
 }
