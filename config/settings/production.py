@@ -19,3 +19,12 @@ ENVIRONMENT_COLOR = "#FF2222"
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+CELERY_BEAT_SCHEDULE['test-task1'] = {
+    'task': 'deleteme.test_app.tasks.task1',
+    'schedule': 10,
+}
+
+CELERY_BEAT_SCHEDULE['test-task2'] = {
+    'task': 'deleteme.test_app.tasks.task2',
+    'schedule': 60,
+}
