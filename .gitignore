@@ -159,3 +159,5 @@ fabric.properties
 # -------------------------------------------------------------------
 # Project rules
 *.sqlite*
+.idea/
+celerybeat.pid
